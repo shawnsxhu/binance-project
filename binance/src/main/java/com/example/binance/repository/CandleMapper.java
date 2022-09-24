@@ -4,6 +4,7 @@ import com.example.binance.dto.Candle;
 import org.apache.ibatis.annotations.*;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Mapper
@@ -11,11 +12,11 @@ public interface CandleMapper {
     @Select("SELECT * FROM candles")
     public List<Candle> findAll();
 
-    @Select("SELECT * FROM candles WHERE id = #{id}")
-    public Candle findById(Long id);
+    @Select("SELECT * FROM candles WHERE load_id = #{id}")
+    public Candle findById(String id);
 
-    @Delete("DELETE FROM candles WHERE id = #{id}")
-    public int deleteById(Long id);
+    @Delete("DELETE FROM candles WHERE load_id = #{id}")
+    public int deleteById(String id);
 
     @Insert("INSERT INTO candles(symbol, load_id, open_time, open, " +
             "high, low, close, volume, close_time, quote_asset_volume, num_trade, " +
@@ -23,8 +24,7 @@ public interface CandleMapper {
             " VALUES (#{symbol}, #{loadId}, #{openTime}, #{open}, " +
             "#{high}, #{low}, #{close}, #{volume}, #{closeTime}, #{quoteAssetVolume}, #{numTrade}, " +
             "#{takerBuyBaseAssetVolume}, #{takerBuyQuoteAssetVolume}, #{ignore})")
-    @SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Long.class)
-    public Long insert(Candle candle);
+    public int insert(@NotNull Candle candle);
 
     @Insert({
             "<script>",
@@ -40,5 +40,5 @@ public interface CandleMapper {
             "</foreach>",
             "</script>"
     })
-    int insertBatch(@Param("candleList") @NotEmpty List<Candle> candleList);
+    public int insertBatch(@Param("candleList") @NotEmpty List<Candle> candleList);
 }

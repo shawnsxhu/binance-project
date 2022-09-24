@@ -5,25 +5,25 @@ import com.example.binance.dto.CandleItem;
 import org.apache.ibatis.annotations.*;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Mapper
 public interface CandleItemMapper {
     @Select("SELECT * FROM candle_items")
-    public List<Candle> findAll();
+    public List<CandleItem> findAll();
 
-    @Select("SELECT * FROM candle_items WHERE id = #{id}")
-    public Candle findById(Long id);
+    @Select("SELECT * FROM candle_items WHERE load_id = #{id}")
+    public CandleItem findById(String id);
 
-    @Delete("DELETE FROM candle_items WHERE id = #{id}")
-    public int deleteById(Long id);
+    @Delete("DELETE FROM candle_items WHERE load_id = #{id}")
+    public int deleteById(String id);
 
-    @Insert("INSERT INTO candle_items(load_id, open_time, open, " +
+    @Insert("INSERT INTO candle_items(load_id, symbol, open_time, open, " +
             "high, low, close, volume, close_time, quote_asset_volume, num_trade)" +
-            " VALUES (#{loadId}, #{openTime}, #{open}, " +
+            " VALUES (#{loadId}, #{symbol}, #{openTime}, #{open}, " +
             "#{high}, #{low}, #{close}, #{volume}, #{closeTime}, #{quoteAssetVolume}, #{numTrade})")
-    @SelectKey(statement = "SELECT LAST_INSERT_ID()", keyProperty = "id", before = false, resultType = Long.class)
-    public Long insert(CandleItem candleItem);
+    public int insert(@NotNull CandleItem candleItem);
 
     @Insert({
             "<script>",
@@ -37,17 +37,17 @@ public interface CandleItemMapper {
             "</foreach>",
             "</script>"
     })
-    int insertBatch(@Param("candleItemList") @NotEmpty List<CandleItem> candleItemList);
+    public int insertBatch(@Param("candleItemList") @NotEmpty List<CandleItem> candleItemList);
 
     @Insert("INSERT INTO candle_items (load_id, symbol, open_time, open, " +
             "high, low, close, volume, close_time, quote_asset_volume, num_trade)" +
-            " SELECT #{loadId}, candles.symbol, CAST(candles.open_time AS UNSIGNED)," +
-            " CAST(candles.open AS DECIMAL), CAST(candles.high AS DECIMAL), CAST(candles.low AS DECIMAL)," +
-            " CAST(candles.close AS DECIMAL), CAST(candles.volume AS DECIMAL)," +
-            " CAST(candles.close_time AS UNSIGNED), CAST(candles.quote_asset_volume AS DECIMAL)," +
-            " CAST(candles.num_trade AS UNSIGNED)" +
+            " SELECT #{loadId}, candles.symbol, CAST(candles.open_time AS BIGINT)," +
+            " CAST(candles.open AS DECIMAL(12,6)), CAST(candles.high AS DECIMAL(12,6)), CAST(candles.low AS DECIMAL(12,6))," +
+            " CAST(candles.close AS DECIMAL(12,6)), CAST(candles.volume AS DECIMAL(12,6))," +
+            " CAST(candles.close_time AS BIGINT), CAST(candles.quote_asset_volume AS DECIMAL(12,6))," +
+            " CAST(candles.num_trade AS BIGINT)" +
             " FROM candles")
-    int insertFromCandles(String loadId);
+    public int insertFromCandles(String loadId);
 //
 //    @Insert("INSERT INTO candle_items (load_id, symbol, open_time, open, " +
 //            "high, low, close, volume, close_time, quote_asset_volume, num_trade)" +

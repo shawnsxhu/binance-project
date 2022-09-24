@@ -4,9 +4,12 @@ import com.example.binance.dto.CandleItem;
 import com.example.binance.dto.ConsumeInfo;
 import com.example.binance.service.ConsumeService;
 import com.example.binance.service.ValidationService;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,30 +25,37 @@ public class ConsumeController {
     @Autowired
     ConsumeService consumeService;
 
-//    @KafkaListener(
-//            topics = "binanceTopic",
-//            groupId = "consumer",
-//            containerFactory = "consumeInfoListenerContainerFactory") ,
-//            Acknowledgment acknowledgment, ConsumeInfo consumeInfo
-    @PostMapping("load")
-    public Pair<String, List<CandleItem>> consume(
-            @RequestParam(value = "symbol", required = true) String symbol,
-            @RequestParam(value = "startTime", required = true) Long openTime,
-            @RequestParam(value = "endTime", required = true) Long closeTime,
-            @RequestParam(value = "interval", required = true) String timeInterval){
+    @Autowired
+    KafkaTemplate<String, List<CandleItem>> kafkaTemplate;
+
+    @Value("${LIMIT}")
+    private int limit;
+
+//
+    @KafkaListener(
+            topics = "binanceConsumerTopic",
+            groupId = "consumer",
+            containerFactory = "consumeInfoListenerContainerFactory")
+    public void consume(ConsumeInfo consumeInfo, Acknowledgment acknowledgment){
 
         //TODO of todo Aggregation - stream - Redis -key (symbol, frequency, time span) - value
         //TODO client controller submit request with (symbol, frequency, time span) return list of requested candle item
 
-        //TODO docker file
-        //TODO 刷题策略 excel
-//        String symbol = consumeInfo.getSymbol();
-//        Long openTime = consumeInfo.getOpenTime();
-//        Long closeTime = consumeInfo.getCloseTime();
-//        String timeInterval = consumeInfo.getTimeInterval();
+        //TODO class diagram & data (database schema) diagram -> docs (diagram using draw.io)
+        //TODO Jenkins: CI/CD pipeline (2 next time)
+        //TODO Unit test, Integration test (1 Saturday check)
+        //TODO docker compose (3)
+
+        String symbol = consumeInfo.getSymbol();
+        Long openTime = consumeInfo.getOpenTime();
+        Long closeTime = consumeInfo.getCloseTime();
+        String timeInterval = consumeInfo.getTimeInterval();
         validationService.isValid(symbol, openTime, closeTime, timeInterval);
         //acknowledge here
-        //acknowledgment.acknowledge();
-        return consumeService.get(symbol, openTime, closeTime, timeInterval);
+        acknowledgment.acknowledge();
+        List<CandleItem> candleItems = consumeService.get(symbol, openTime, closeTime, timeInterval);
+        for(List<CandleItem> candleItemPartition : ListUtils.partition(candleItems, limit)){
+            kafkaTemplate.send("binanceConsumerClientTopic", candleItemPartition);
+        }
     }
 }

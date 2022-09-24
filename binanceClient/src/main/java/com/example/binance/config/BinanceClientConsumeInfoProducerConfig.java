@@ -1,8 +1,8 @@
 package com.example.binance.config;
 
-import com.example.binance.dto.CandleItem;
+import com.example.binance.dto.ConsumeInfo;
+import com.example.binance.dto.LoadInfo;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,21 +12,20 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Configuration
-public class KafkaProducerConfig {
+public class BinanceClientConsumeInfoProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
     @Bean
-    public ProducerFactory<String, List<CandleItem>> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    public ProducerFactory<String, ConsumeInfo> consumeInfoProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(consumeInfoProducerConfigs());
     }
 
     @Bean
-    public Map<String, Object> producerConfigs() {
+    public Map<String, Object> consumeInfoProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
@@ -35,7 +34,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, List<CandleItem>> kafkaTemplate() {
-        return new KafkaTemplate<String, List<CandleItem>>(producerFactory());
+    public KafkaTemplate<String, ConsumeInfo> kafkaConsumerTemplate() {
+        return new KafkaTemplate<String, ConsumeInfo>(consumeInfoProducerFactory());
     }
 }

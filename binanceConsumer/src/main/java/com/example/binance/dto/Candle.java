@@ -3,6 +3,7 @@ package com.example.binance.dto;
 import com.example.binance.util.Symbol;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 

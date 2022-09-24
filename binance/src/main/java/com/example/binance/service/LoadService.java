@@ -121,6 +121,9 @@ public class LoadService {
         final int maxMillisecond = minToMillisecond * requestLimit;
         if (startTime.equals(endTime)){
             timeStampList.add(startTime);
+            List<Long> timestamps = new ArrayList<>(timeStampList);
+            timestamps.add(endTime);
+            return timestamps;
         }
         while(startTime < endTime){
             timeStampList.add(startTime);

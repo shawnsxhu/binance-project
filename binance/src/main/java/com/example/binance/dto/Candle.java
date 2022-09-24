@@ -1,19 +1,20 @@
 package com.example.binance.dto;
 
 import com.example.binance.util.Symbol;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
 @Builder
 @Data
+@Getter
+@Setter
 public class Candle {
     public static Candle getCandle(List<Object> data, String loadId, Symbol symbol){
         int index = 0;
         Candle candle = Candle.builder()
-                .loadId(loadId)
                 .symbol(symbol.getSymbol())
+                .loadId(loadId)
                 .openTime(data.get(index++).toString())
                 .open(data.get(index++).toString())
                 .high(data.get(index++).toString())
@@ -30,9 +31,8 @@ public class Candle {
         return candle;
     }
 
-    private String loadId;
     private String symbol;
-
+    private String loadId;
 
     private String openTime;
     private String open;

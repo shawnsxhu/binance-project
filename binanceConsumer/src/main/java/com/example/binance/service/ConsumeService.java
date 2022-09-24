@@ -20,15 +20,15 @@ public class ConsumeService {
     @Autowired
     CandleItemRedisRepository candleItemRedisRepository;
 
-    public Pair<String, List<CandleItem>> get(String symbol, Long openTime, Long closeTime, String timeInterval) {
-        String consumeID = UUID.randomUUID().toString();
+    // Do not need new UUID for this one. Return List of CandleItem
+    public List<CandleItem> get(String symbol, Long openTime, Long closeTime, String timeInterval) {
 
         ConsumeInfo candleItemKey = new ConsumeInfo(symbol, timeInterval, openTime, closeTime);
 
         List<CandleItem> candleListRedis = candleItemRedisRepository.getOneCandleItem(candleItemKey);
 
         if (candleListRedis != null && candleListRedis.size() != 0){
-            return Pair.of(consumeID, candleListRedis);
+            return candleListRedis;
         }else{
             List<CandleItem> candleList = candleItemMapper.findByTime(openTime, closeTime)
                     .stream()
@@ -39,7 +39,7 @@ public class ConsumeService {
             if (candleList.size() != 0) {
                 candleItemRedisRepository.saveCandleItem(candleList, candleItemKey);
             }
-            return Pair.of(consumeID, candleList);
+            return candleList;
         }
     }
 

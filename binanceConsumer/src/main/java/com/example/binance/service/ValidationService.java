@@ -48,5 +48,8 @@ public class ValidationService {
         if(endTime < startTime) {
             throw new IllegalArgumentException(illegalTimeTemplate);
         }
+
+        //TODO limit return data to 1G per time
+        //pagination
     }
 }

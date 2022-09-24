@@ -12,9 +12,27 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic topic1() {
         return TopicBuilder.name("binanceTopic")
-                .partitions(5)
+                .partitions(10)
                 .replicas(1)
                 .config(TopicConfig.RETENTION_MS_CONFIG, "60000")
+                .build();
+    }
+
+    @Bean
+    public NewTopic topic2() {
+        return TopicBuilder.name("binanceConsumerTopic")
+                .partitions(5)
+                .replicas(1)
+                .config(TopicConfig.RETENTION_MS_CONFIG, "500")
+                .build();
+    }
+
+    @Bean
+    public NewTopic topic3() {
+        return TopicBuilder.name("binanceConsumerClientTopic")
+                .partitions(2)
+                .replicas(1)
+                .config(TopicConfig.RETENTION_MS_CONFIG, "500")
                 .build();
     }
 }
